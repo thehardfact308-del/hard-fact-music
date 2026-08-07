@@ -2404,10 +2404,10 @@ function waveform(seed, count = 48) {
 }
 
 const TRACKS = [
-  { id: 1, title: 'Сталеві серця',        titleEn: 'Hearts of Steel',       artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:42', price: 89, cat: 'HFM-001' },
-  { id: 2, title: 'Я повернусь до дому',  titleEn: 'I Will Return Home',    artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:05', price: 89, cat: 'HFM-002' },
-  { id: 3, title: 'Ангели',               titleEn: 'Angels',                artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:28', price: 89, cat: 'HFM-003' },
-  { id: 4, title: 'Душа України',         titleEn: 'Soul of Ukraine',       artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:12', price: 89, cat: 'HFM-004' },
+  { id: 1, title: 'Сила моя',              titleEn: 'My Strength',           artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:17', price: 89, cat: 'HFM-001', audioUrl: 'audio/sila-moya.mp3' },
+  { id: 2, title: 'Ангели',                titleEn: 'Angels',                artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:37', price: 89, cat: 'HFM-002', audioUrl: 'audio/angeli.mp3' },
+  { id: 3, title: 'Я повернусь додому',    titleEn: 'I Will Return Home',    artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:54', price: 89, cat: 'HFM-003', audioUrl: 'audio/ya-povernus-dodomu.mp3' },
+  { id: 4, title: 'Ми там де треба',       titleEn: 'We Are Where We\u2019re Needed', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:56', price: 89, cat: 'HFM-004', audioUrl: 'audio/mi-tam-de-treba.mp3' },
 ];
 
 // attach waveform data
@@ -2416,8 +2416,8 @@ TRACKS.forEach(t => { t.wave = waveform(t.id * 137); });
 const FEATURED = {
   tag: 'Новий реліз / New Release',
   meta: 'SINGLE · HFM-001 · 2026',
-  title: 'Сталеві серця',
-  titleEn: 'Hearts of Steel',
+  title: 'Сила моя',
+  titleEn: 'My Strength',
   artist: 'Hard Fact Music',
   description: 'Текст написаний до того, як з\u2019явився хоч один промпт. Пісня про людей, які тримають фронт, коли решта світу гортає стрічку. Аранжування — Suno AI, відеоряд — Veo3, зведення — FL Studio. Слова, образи та кожне творче рішення — авторські.',
   descriptionEn: 'The words were written before any prompt existed. A song about the people holding the front while the rest of the world scrolls past. Arrangement — Suno AI, visuals — Veo3, mixing — FL Studio. The words, the imagery, every creative decision — human, authored.',
@@ -2494,130 +2494,78 @@ const Icon = {
 };
 
 /* ============================================
-   AudioContext-based synth player
-   (creates a filtered noise + tone bed so
-    demo tracks are audible without shipping mp3s)
+   Real HTML5 audio player
+   (plays actual mp3 files instead of a synth demo)
    ============================================ */
-function useSynthPlayer() {
-  const ctxRef = useRef(null);
-  const nodesRef = useRef(null);
-  const rafRef = useRef(null);
-  const startTimeRef = useRef(0);
-  const pausedAtRef = useRef(0);
+function useAudioPlayer() {
+  const audioRef = useRef(null);
+  if (!audioRef.current && typeof Audio !== 'undefined') {
+    audioRef.current = new Audio();
+    audioRef.current.preload = 'metadata';
+  }
 
   const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(0); // seconds elapsed
-  const [duration, setDuration] = useState(210); // fake duration seconds
-  const [volume, setVolume] = useState(0.6);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolumeState] = useState(0.6);
 
-  const ensureCtx = () => {
-    if (!ctxRef.current) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      ctxRef.current = new AC();
-    }
-    return ctxRef.current;
-  };
-
-  const stop = useCallback(() => {
-    if (nodesRef.current) {
-      try { nodesRef.current.gain.gain.cancelScheduledValues(ctxRef.current.currentTime); } catch {}
-      try { nodesRef.current.gain.gain.setValueAtTime(0, ctxRef.current.currentTime); } catch {}
-      try { nodesRef.current.osc1.stop(); } catch {}
-      try { nodesRef.current.osc2.stop(); } catch {}
-      try { nodesRef.current.lfoOsc.stop(); } catch {}
-      nodesRef.current = null;
-    }
-    cancelAnimationFrame(rafRef.current);
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = volume;
+    const onTime = () => setCurrent(audio.currentTime);
+    const onMeta = () => setDuration(audio.duration || 0);
+    const onEnd = () => { setPlaying(false); setCurrent(0); };
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('loadedmetadata', onMeta);
+    audio.addEventListener('ended', onEnd);
+    return () => {
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('loadedmetadata', onMeta);
+      audio.removeEventListener('ended', onEnd);
+    };
   }, []);
 
-  const play = useCallback((seedFreq = 55, dur = 210) => {
-    const ctx = ensureCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-    stop();
-
-    // Two detuned sawtooth oscillators + slow LFO on filter for cinematic pad
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    osc1.type = 'sawtooth';
-    osc2.type = 'sawtooth';
-    osc1.frequency.value = seedFreq;
-    osc2.frequency.value = seedFreq * 1.005;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 400;
-    filter.Q.value = 6;
-
-    const lfoOsc = ctx.createOscillator();
-    lfoOsc.frequency.value = 0.15;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 250;
-    lfoOsc.connect(lfoGain).connect(filter.frequency);
-
-    const gain = ctx.createGain();
-    gain.gain.value = 0;
-    gain.gain.linearRampToValueAtTime(volume * 0.25, ctx.currentTime + 1.2);
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(gain).connect(ctx.destination);
-
-    osc1.start();
-    osc2.start();
-    lfoOsc.start();
-
-    nodesRef.current = { osc1, osc2, lfoOsc, gain, filter };
-    startTimeRef.current = ctx.currentTime - pausedAtRef.current;
-    setDuration(dur);
-    setPlaying(true);
-
-    const tick = () => {
-      const elapsed = ctx.currentTime - startTimeRef.current;
-      setCurrent(elapsed);
-      if (elapsed >= dur) {
-        pausedAtRef.current = 0;
-        setCurrent(0);
-        setPlaying(false);
-        stop();
-        return;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    tick();
-  }, [volume, stop]);
-
-  const pause = useCallback(() => {
-    if (!nodesRef.current || !ctxRef.current) return;
-    pausedAtRef.current = ctxRef.current.currentTime - startTimeRef.current;
-    stop();
-    setPlaying(false);
-  }, [stop]);
-
-  const seek = useCallback((t) => {
-    pausedAtRef.current = t;
-    setCurrent(t);
-    if (playing) {
-      // relaunch at new position
-      const wasPlaying = playing;
-      stop();
-      if (wasPlaying && nodesRef.current === null) {
-        // will be relaunched by caller
-      }
-    }
-  }, [playing, stop]);
-
-  // volume live-update
   useEffect(() => {
-    if (nodesRef.current) {
-      try {
-        nodesRef.current.gain.gain.linearRampToValueAtTime(
-          volume * 0.25, ctxRef.current.currentTime + 0.1
-        );
-      } catch {}
-    }
+    if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
 
-  useEffect(() => () => stop(), [stop]);
+  const play = useCallback((url, fallbackDur = 0) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.src.indexOf(url) === -1) {
+      audio.src = url;
+      setDuration(fallbackDur);
+      setCurrent(0);
+    }
+    audio.play().catch(() => {});
+    setPlaying(true);
+  }, []);
+
+  const pause = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    setPlaying(false);
+  }, []);
+
+  const stop = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setPlaying(false);
+    setCurrent(0);
+  }, []);
+
+  const seek = useCallback((t) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = t;
+    setCurrent(t);
+  }, []);
+
+  const setVolume = useCallback((v) => setVolumeState(v), []);
 
   return { play, pause, stop, seek, setVolume, playing, current, duration, volume };
 }
@@ -2628,7 +2576,7 @@ function useSynthPlayer() {
 const PlayerCtx = createContext(null);
 
 function PlayerProvider({ children }) {
-  const synth = useSynthPlayer();
+  const player = useAudioPlayer();
   const [track, setTrack] = useState(null);
   const [queue, setQueue] = useState([]);
 
@@ -2640,19 +2588,14 @@ function PlayerProvider({ children }) {
   const playTrack = useCallback((t, list) => {
     if (list) setQueue(list);
     setTrack(t);
-    // seed frequency: derive from track id, keep in low range (40-80 Hz fundamental)
-    const seedFreq = 45 + ((t.id * 7) % 40);
-    synth.play(seedFreq, parseDuration(t.duration));
-  }, [synth]);
+    player.play(t.audioUrl, parseDuration(t.duration));
+  }, [player]);
 
   const toggle = useCallback(() => {
     if (!track) return;
-    if (synth.playing) synth.pause();
-    else {
-      const seedFreq = 45 + ((track.id * 7) % 40);
-      synth.play(seedFreq, parseDuration(track.duration));
-    }
-  }, [track, synth]);
+    if (player.playing) player.pause();
+    else player.play(track.audioUrl, parseDuration(track.duration));
+  }, [track, player]);
 
   const next = useCallback(() => {
     if (!track || queue.length === 0) return;
@@ -2670,16 +2613,17 @@ function PlayerProvider({ children }) {
 
   const value = {
     track,
-    playing: synth.playing,
-    current: synth.current,
-    duration: synth.duration,
-    volume: synth.volume,
-    setVolume: synth.setVolume,
+    playing: player.playing,
+    current: player.current,
+    duration: player.duration,
+    volume: player.volume,
+    setVolume: player.setVolume,
     playTrack,
     toggle,
     next,
     prev,
-    stop: () => { synth.stop(); setTrack(null); },
+    seek: player.seek,
+    stop: () => { player.stop(); setTrack(null); },
   };
 
   return <PlayerCtx.Provider value={value}>{children}</PlayerCtx.Provider>;
@@ -2704,17 +2648,11 @@ function StickyPlayer({ onBuy, lang, inCart }) {
   const barRef = useRef(null);
 
   const onSeek = (e) => {
-    if (!p.track || !barRef.current) return;
+    if (!p.track || !barRef.current || !p.duration) return;
     const rect = barRef.current.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const newTime = pct * p.duration;
-    // simple seek: restart from new position
-    const seedFreq = 45 + ((p.track.id * 7) % 40);
-    // set startTime so elapsed appears at newTime — trick: pause then play at offset
-    // Simpler: just call playTrack with offset by temporarily hacking pausedAt
-    // For UX we just restart and note position via synth internals
-    p.playTrack(p.track);
-    // (we won't wire true mid-file scrub in the synth demo; it's a mock)
+    p.seek(newTime);
   };
 
   if (!p.track) {
