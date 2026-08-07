@@ -31,7 +31,7 @@
   --accent-text: #0a0a0a;
 
   --row-h: 64px;
-  --pad-y: clamp(72px, 9vw, 128px);
+  --pad-y: clamp(40px, 5vw, 72px);
 
   --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   --sans: 'Manrope', system-ui, -apple-system, sans-serif;
@@ -54,6 +54,39 @@
 }
 
 [data-density="compact"] { --row-h: 52px; --pad-y: clamp(48px, 6vw, 88px); }
+
+/* Per-section wave tints — blue at top, transitioning to yellow at bottom */
+.hero     { --tint-a: rgba(90,165,255,0.50); --tint-b: rgba(0,87,183,0.42);  --tint-c: rgba(0,45,110,0.30); }
+#releases { --tint-a: rgba(0,110,210,0.38);  --tint-b: rgba(0,60,140,0.32);  --tint-c: rgba(0,30,80,0.24); }
+#tracks   { --tint-a: rgba(190,150,15,0.30); --tint-b: rgba(150,115,8,0.28); --tint-c: rgba(95,72,0,0.22); }
+#shop     { --tint-a: rgba(255,214,10,0.46); --tint-b: rgba(230,185,8,0.38); --tint-c: rgba(160,128,0,0.28); }
+
+.hero, #releases, #tracks, #shop { position: relative; overflow: hidden; }
+.hero::before, #releases::before, #tracks::before, #shop::before {
+  content: '';
+  position: absolute;
+  inset: -15% -10%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(70px);
+  background:
+    radial-gradient(42% 55% at 18% 28%, var(--tint-a) 0%, transparent 72%),
+    radial-gradient(48% 48% at 82% 68%, var(--tint-b) 0%, transparent 72%),
+    radial-gradient(38% 38% at 50% 100%, var(--tint-c) 0%, transparent 72%);
+  background-size: 160% 160%;
+  animation: waveFlow 24s ease-in-out infinite alternate;
+}
+.hero > .container, #releases > .container, #tracks > .container, #shop > .container {
+  position: relative; z-index: 1;
+}
+@keyframes waveFlow {
+  0%   { background-position: 0% 10%, 100% 90%, 50% 100%; }
+  50%  { background-position: 25% 30%, 75% 70%, 55% 85%; }
+  100% { background-position: 10% 45%, 90% 55%, 45% 90%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero::before, #releases::before, #tracks::before, #shop::before { animation: none; }
+}
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
@@ -174,11 +207,11 @@ img { display: block; max-width: 100%; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
 .hero h1 {
-  font-size: clamp(56px, 10vw, 148px);
-  line-height: 0.92;
+  font-size: clamp(38px, 6vw, 84px);
+  line-height: 0.95;
   font-weight: 800;
-  letter-spacing: -0.045em;
-  margin: 0 0 24px;
+  letter-spacing: -0.04em;
+  margin: 0 0 14px;
   text-wrap: balance;
 }
 .hero h1 .accent { color: var(--accent); }
@@ -188,21 +221,13 @@ img { display: block; max-width: 100%; }
 }
 .hero-en {
   font-family: var(--mono);
-  font-size: clamp(11px, 1.2vw, 13px);
+  font-size: clamp(10px, 1.1vw, 12px);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  margin: -8px 0 40px;
+  margin: -4px 0 0;
   max-width: 700px;
   line-height: 1.6;
-}
-.hero-manifesto {
-  max-width: 640px;
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height: 1.55;
-  color: var(--text-dim);
-  text-wrap: pretty;
-  margin-bottom: 56px;
 }
 
 .hero-stats {
@@ -277,7 +302,7 @@ img { display: block; max-width: 100%; }
 .section { padding: var(--pad-y) 0; border-top: 1px solid var(--hairline); }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
   gap: 24px;
 }
 .section-num {
@@ -286,14 +311,14 @@ img { display: block; max-width: 100%; }
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 .section-num::before { content: '— '; }
 .section h2 {
-  font-size: clamp(36px, 5vw, 68px);
-  line-height: 0.95;
+  font-size: clamp(26px, 3.4vw, 44px);
+  line-height: 0.98;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin: 0;
   text-wrap: balance;
 }
@@ -2813,13 +2838,6 @@ function Hero({ lang, variant }) {
           }
         </div>
 
-        <p className="hero-manifesto">
-          {lang === 'ua'
-            ? 'Кожен рядок написаний до появи будь-якого промпту. Suno, Veo3 та FL Studio — інструменти, а не автори. Текст, образи й сенс — завжди людські.'
-            : 'Every line is written before any prompt exists. Suno, Veo3 and FL Studio are tools, not authors. The text, the imagery, the meaning — always human.'
-          }
-        </p>
-
         {variant === 'marquee' && (
           <div className="marquee">
             <div className="marquee-track">
@@ -2830,17 +2848,6 @@ function Hero({ lang, variant }) {
                 </React.Fragment>
               ))}
             </div>
-          </div>
-        )}
-
-        {(variant === 'stat-grid' || variant === 'manifesto') && (
-          <div className="hero-stats">
-            {stats.map((s, i) => (
-              <div key={i}>
-                <div className="n">{s.n}{s.unit && <span className="unit">{s.unit}</span>}</div>
-                <div className="lbl">{s.lbl}</div>
-              </div>
-            ))}
           </div>
         )}
       </div>
