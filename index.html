@@ -361,6 +361,44 @@ img { display: block; max-width: 100%; }
   max-width: 700px;
   line-height: 1.6;
 }
+.hero-links {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.hero-links__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hero-links__hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  padding-left: 4px;
+}
+.hero-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.hero-links a:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
 
 .hero-stats {
   display: grid;
@@ -2041,6 +2079,8 @@ const Icon = {
   Heart: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/></svg>,
   ArrowRight: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
   Radio: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M4.9 19.1A10 10 0 0119.1 4.9M8.4 15.6a5 5 0 017.2-7.2M12 12h.01"/><path d="M5 20h14"/></svg>,
+  YouTube: (p) => <svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" {...p}><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.5v-7l6.3 3.5-6.3 3.5z"/></svg>,
+  Spotify: (p) => <svg viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em" {...p}><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.6.6 0 01-.83.2c-2.3-1.4-5.2-1.7-8.6-.9a.6.6 0 11-.27-1.17c3.7-.85 6.9-.48 9.5 1.1.28.17.37.53.2.86zm1.2-2.7a.75.75 0 01-1 .26c-2.6-1.6-6.6-2.06-9.7-1.13a.75.75 0 11-.43-1.44c3.5-1.05 7.9-.53 10.9 1.3.36.22.47.68.24 1.01zm.1-2.8C14.9 9 9.1 8.8 6.1 9.75a.9.9 0 11-.55-1.7c3.5-1.1 9.9-.87 13.4 1.2a.9.9 0 11-.9 1.55z"/></svg>,
 };
 
 /* ============================================
@@ -2417,6 +2457,22 @@ function Hero({ lang, variant }) {
             }
           </div>
 
+          <div className="hero-links">
+            <div className="hero-links__item">
+              <a href="https://www.youtube.com/@TheHardFact" target="_blank" rel="noopener noreferrer">
+                <Icon.YouTube style={{fontSize: 15}} />
+                <span>YouTube</span>
+              </a>
+              <span className="hero-links__hint">
+                {lang === 'ua' ? 'тут відеокліпи' : 'watch the music videos here'}
+              </span>
+            </div>
+            <a href="https://open.spotify.com/artist/5oDiW1ZTqwaIHaldX2AmJm" target="_blank" rel="noopener noreferrer">
+              <Icon.Spotify style={{fontSize: 15}} />
+              <span>Spotify</span>
+            </a>
+          </div>
+
           {variant === 'marquee' && (
             <div className="marquee">
               <div className="marquee-track">
@@ -2784,10 +2840,10 @@ function Footer({ lang }) {
             <h5>{lang === 'ua' ? 'Соцмережі' : 'Social'}</h5>
             <ul>
               <li><a href="#">Instagram</a></li>
-              <li><a href="#">YouTube</a></li>
+              <li><a href="https://www.youtube.com/@TheHardFact" target="_blank" rel="noopener noreferrer">YouTube</a></li>
               <li><a href="#">Bandcamp</a></li>
               <li><a href="#">Telegram</a></li>
-              <li><a href="#">Spotify</a></li>
+              <li><a href="https://open.spotify.com/artist/5oDiW1ZTqwaIHaldX2AmJm" target="_blank" rel="noopener noreferrer">Spotify</a></li>
             </ul>
           </div>
         </div>
