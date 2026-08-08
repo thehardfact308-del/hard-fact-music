@@ -2102,14 +2102,14 @@ function useAudioPlayer() {
     if (!audio) return;
     setError(null);
     if (audio.src.indexOf(url) === -1) {
-      audio.src = url;
-      audio.load(); // forces mobile browsers to reset/reload the new source reliably
+      audio.src = url; // setting src already triggers loading — no need to also call load()
       setDuration(fallbackDur);
       setCurrent(0);
     }
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.catch === 'function') {
       playPromise.catch((err) => {
+        if (err && err.name === 'AbortError') return; // superseded by a newer play/pause call — not a real error
         setPlaying(false);
         setError(
           err && err.name === 'NotAllowedError'
