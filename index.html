@@ -2052,6 +2052,9 @@ function useAudioPlayer() {
   if (!audioRef.current && typeof Audio !== 'undefined') {
     audioRef.current = new Audio();
     audioRef.current.preload = 'metadata';
+    audioRef.current.setAttribute('playsinline', '');
+    audioRef.current.setAttribute('webkit-playsinline', '');
+    audioRef.current.style.display = 'none';
   }
 
   const [playing, setPlaying] = useState(false);
@@ -2059,21 +2062,34 @@ function useAudioPlayer() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.6);
   const [ended, setEnded] = useState(0);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    // Attaching the element to the DOM (even hidden) avoids playback
+    // quirks some mobile browsers have with detached <audio> elements.
+    if (!audio.parentNode) document.body.appendChild(audio);
     audio.volume = volume;
     const onTime = () => setCurrent(audio.currentTime);
     const onMeta = () => setDuration(audio.duration || 0);
     const onEnd = () => { setPlaying(false); setCurrent(0); setEnded(n => n + 1); };
+    const onPlaying = () => setError(null);
+    const onError = () => {
+      setPlaying(false);
+      setError('Не вдалося завантажити аудіо. Перевірте з’єднання і спробуйте ще раз.');
+    };
     audio.addEventListener('timeupdate', onTime);
     audio.addEventListener('loadedmetadata', onMeta);
     audio.addEventListener('ended', onEnd);
+    audio.addEventListener('playing', onPlaying);
+    audio.addEventListener('error', onError);
     return () => {
       audio.removeEventListener('timeupdate', onTime);
       audio.removeEventListener('loadedmetadata', onMeta);
       audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('playing', onPlaying);
+      audio.removeEventListener('error', onError);
     };
   }, []);
 
@@ -2084,12 +2100,24 @@ function useAudioPlayer() {
   const play = useCallback((url, fallbackDur = 0) => {
     const audio = audioRef.current;
     if (!audio) return;
+    setError(null);
     if (audio.src.indexOf(url) === -1) {
       audio.src = url;
+      audio.load(); // forces mobile browsers to reset/reload the new source reliably
       setDuration(fallbackDur);
       setCurrent(0);
     }
-    audio.play().catch(() => {});
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch((err) => {
+        setPlaying(false);
+        setError(
+          err && err.name === 'NotAllowedError'
+            ? 'Браузер заблокував відтворення. Натисніть кнопку play ще раз.'
+            : 'Не вдалося відтворити трек. Спробуйте ще раз.'
+        );
+      });
+    }
     setPlaying(true);
   }, []);
 
@@ -2118,7 +2146,7 @@ function useAudioPlayer() {
 
   const setVolume = useCallback((v) => setVolumeState(v), []);
 
-  return { play, pause, stop, seek, setVolume, playing, current, duration, volume, ended };
+  return { play, pause, stop, seek, setVolume, playing, current, duration, volume, ended, error };
 }
 
 /* ============================================
@@ -2187,6 +2215,7 @@ function PlayerProvider({ children }) {
     next,
     prev,
     seek: player.seek,
+    error: player.error,
     stop: () => { player.stop(); setTrack(null); },
   };
 
@@ -2429,6 +2458,12 @@ function Hero({ lang, variant }) {
                 ? (lang === 'ua' ? 'Зараз грає: ' : 'Now playing: ') + p.track.title
                 : (lang === 'ua' ? 'Натисни, щоб увімкнути ефір' : 'Tap to go live')}
             </div>
+            {p.error && (
+              <div style={{
+                marginTop: 8, textAlign: 'center', fontSize: 11,
+                color: '#ff9d97', fontFamily: 'var(--mono)', lineHeight: 1.5,
+              }}>{p.error}</div>
+            )}
           </div>
         </div>
       </div>
