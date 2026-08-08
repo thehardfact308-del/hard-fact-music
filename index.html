@@ -360,7 +360,10 @@ img { display: block; max-width: 100%; }
   position: relative;
   overflow: hidden;
 }
-.featured-art image-slot { width: 100%; height: 100%; display: block; }
+.featured-art video.featured-video {
+  width: 100%; height: 100%; display: block;
+  object-fit: cover; background: #000;
+}
 .featured-tag {
   position: absolute; top: 20px; left: 20px;
   background: var(--accent);
@@ -2234,7 +2237,15 @@ function Featured({ lang, onPlay, onBuy, isInCart }) {
         <div className="featured">
           <div className="featured-art">
             <div className="featured-tag">{FEATURED.tag}</div>
-            <image-slot id="featured-lp" shape="rect" placeholder={lang === 'ua' ? 'Обкладинка треку 1:1' : 'Track cover 1:1'}></image-slot>
+            <video
+              className="featured-video"
+              poster="video/hard-fact-intro-poster.jpg"
+              controls
+              playsInline
+              preload="metadata"
+            >
+              <source src="video/hard-fact-intro.mp4" type="video/mp4" />
+            </video>
           </div>
 
           <div>
