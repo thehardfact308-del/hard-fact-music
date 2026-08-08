@@ -193,6 +193,15 @@ img { display: block; max-width: 100%; }
    Hero
    ============================================ */
 .hero { padding: var(--pad-y) 0 calc(var(--pad-y) - 24px); position: relative; overflow: hidden; }
+.hero .container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .hero .container { grid-template-columns: 1fr; }
+}
 .hero-meta {
   display: flex; align-items: center; gap: 14px;
   font-family: var(--mono);
@@ -232,31 +241,114 @@ img { display: block; max-width: 100%; }
   color: inherit;
   -webkit-text-stroke: 1px #ffb0a8;
 }
-.radio-launch {
-  display: inline-flex;
+/* ============================================
+   HFM Radio widget — vintage tube-radio look
+   ============================================ */
+.hero-radio { display: flex; justify-content: center; }
+.radio-unit {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background:
+    radial-gradient(120% 140% at 50% -20%, rgba(230,57,70,0.14) 0%, transparent 60%),
+    linear-gradient(180deg, #140505 0%, #0a0202 55%, #050101 100%);
+  border: 1px solid #3a0d10;
+  border-radius: 18px;
+  padding: 22px 22px 26px;
+  box-shadow:
+    0 0 0 1px rgba(230,57,70,0.08),
+    0 20px 50px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.radio-unit__label {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #ff9d97;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 14px;
+}
+.radio-unit__logo {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6));
+}
+.radio-unit__grille {
+  height: 34px;
+  margin: 0 4px 14px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, #2a0a0c 0 3px, #0c0202 3px 6px);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+.radio-unit__freq {
+  display: flex; justify-content: space-between;
+  padding: 0 4px;
+  margin-bottom: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #7a2c2f;
+  letter-spacing: 0.04em;
+}
+.radio-unit__play {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin: 8px 0 18px;
-  padding: 15px 22px;
+  padding: 20px 16px 16px;
   border: 1px solid #ff625f;
-  background: #8b0611;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #b0121f 0%, #7c0510 100%);
   color: #fff5f3;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #3f0007, 0 14px 26px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.radio-unit__play:hover { transform: translateY(-1px); }
+.radio-unit__play:active { transform: translateY(4px); box-shadow: 0 2px 0 #3f0007; }
+.radio-unit__play-label {
+  display: flex; align-items: center; gap: 10px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  box-shadow: 0 5px 0 #480007, 0 10px 20px rgba(0,0,0,0.28);
-  transition: transform 0.15s ease, background 0.15s ease;
 }
-.radio-launch:hover { background: #b90c19; transform: translateY(-1px); }
-.radio-launch:active { transform: translateY(3px); box-shadow: 0 2px 0 #480007; }
-.radio-launch .radio-mark {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ff817b;
-  box-shadow: 0 0 0 4px rgba(255,129,123,0.18), 0 0 12px #ff4d47;
+.radio-unit__vu {
+  display: flex; align-items: flex-end; gap: 3px;
+  height: 22px;
+}
+.radio-unit__vu i {
+  width: 4px;
+  border-radius: 1px;
+  background: #ffb0a8;
+  height: 5px;
+  opacity: 0.55;
+}
+.radio-unit.is-playing .radio-unit__vu i {
+  animation: vuBounce 0.9s ease-in-out infinite;
+  opacity: 1;
+}
+@keyframes vuBounce {
+  0%, 100% { height: 4px; }
+  50% { height: 20px; }
+}
+.radio-unit__now {
+  margin-top: 14px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #a35b57;
+  letter-spacing: 0.04em;
+  min-height: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 }
 .hero-en {
@@ -2271,48 +2363,74 @@ function Hero({ lang, variant }) {
   return (
     <section className="hero">
       <div className="container">
-        <div className="hero-meta">
-          <span className="dot live-dot" />
-          <span>{lang === 'ua' ? 'В ЕФІРІ' : 'ON AIR'}</span>
-          <span>·</span>
-          <span>KYIV · UA · 24/7</span>
-          <span>·</span>
-          <span>{new Date().toISOString().slice(0,10)}</span>
-        </div>
+        <div className="hero-content">
+          <div className="hero-meta">
+            <span className="dot live-dot" />
+            <span>{lang === 'ua' ? 'В ЕФІРІ' : 'ON AIR'}</span>
+            <span>·</span>
+            <span>KYIV · UA · 24/7</span>
+            <span>·</span>
+            <span>{new Date().toISOString().slice(0,10)}</span>
+          </div>
 
-        <h1>
-          {lang === 'ua' ? (
-            <>Музика,<br/><span className="stroke">яка</span> <span className="accent">не мовчить.</span></>
-          ) : (
-            <>Music<br/><span className="stroke">that</span> <span className="accent">won't stay silent.</span></>
+          <h1>
+            {lang === 'ua' ? (
+              <>Музика,<br/><span className="stroke">яка</span> <span className="accent">не мовчить.</span></>
+            ) : (
+              <>Music<br/><span className="stroke">that</span> <span className="accent">won't stay silent.</span></>
+            )}
+          </h1>
+
+          <div className="hero-en">
+            {lang === 'ua'
+              ? 'HARD FACT MUSIC — AUTHOR PROJECT OF VOLODYMYR HONCHARENKO — POETRY OF THE WAR'
+              : 'HARD FACT MUSIC — АВТОРСЬКИЙ ПРОЄКТ ВОЛОДИМИРА ГОНЧАРЕНКА — ПОЕЗІЯ ВІЙНИ'
+            }
+          </div>
+
+          {variant === 'marquee' && (
+            <div className="marquee">
+              <div className="marquee-track">
+                {['СЛАВА УКРАЇНІ', 'GLORY TO UKRAINE', 'НЕ ЗДАМОСЯ', 'WE WILL NOT YIELD', 'ГЕРОЯМ СЛАВА', 'GLORY TO THE HEROES'].concat(['СЛАВА УКРАЇНІ', 'GLORY TO UKRAINE', 'НЕ ЗДАМОСЯ', 'WE WILL NOT YIELD', 'ГЕРОЯМ СЛАВА', 'GLORY TO THE HEROES']).map((s, i) => (
+                  <React.Fragment key={i}>
+                    <span>{s}</span>
+                    <span className="sep">◆</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
           )}
-        </h1>
-
-        <button className="radio-launch" onClick={p.playRadio}>
-          <span className="radio-mark" aria-hidden="true" />
-          <Icon.Radio style={{fontSize: 17}} />
-          <span>{lang === 'ua' ? 'Слухати радіо 24/7' : 'Listen to radio 24/7'}</span>
-        </button>
-
-        <div className="hero-en">
-          {lang === 'ua'
-            ? 'HARD FACT MUSIC — AUTHOR PROJECT OF VOLODYMYR HONCHARENKO — POETRY OF THE WAR'
-            : 'HARD FACT MUSIC — АВТОРСЬКИЙ ПРОЄКТ ВОЛОДИМИРА ГОНЧАРЕНКА — ПОЕЗІЯ ВІЙНИ'
-          }
         </div>
 
-        {variant === 'marquee' && (
-          <div className="marquee">
-            <div className="marquee-track">
-              {['СЛАВА УКРАЇНІ', 'GLORY TO UKRAINE', 'НЕ ЗДАМОСЯ', 'WE WILL NOT YIELD', 'ГЕРОЯМ СЛАВА', 'GLORY TO THE HEROES'].concat(['СЛАВА УКРАЇНІ', 'GLORY TO UKRAINE', 'НЕ ЗДАМОСЯ', 'WE WILL NOT YIELD', 'ГЕРОЯМ СЛАВА', 'GLORY TO THE HEROES']).map((s, i) => (
-                <React.Fragment key={i}>
-                  <span>{s}</span>
-                  <span className="sep">◆</span>
-                </React.Fragment>
-              ))}
+        <div className="hero-radio">
+          <div className={`radio-unit${p.playing ? ' is-playing' : ''}`}>
+            <div className="radio-unit__label">
+              <span className="dot live-dot" />
+              <span>HFM RADIO · 24/7</span>
+            </div>
+            <img className="radio-unit__logo" src="img/hfm-logo-radio.webp" alt="HFM" />
+            <div className="radio-unit__grille" aria-hidden="true" />
+            <div className="radio-unit__freq" aria-hidden="true">
+              {['88','92','96','100','104','108'].map(f => <span key={f}>{f}</span>)}
+            </div>
+            <button className="radio-unit__play" onClick={p.playRadio}>
+              <span className="radio-unit__vu" aria-hidden="true">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <i key={i} style={{ animationDelay: (i * 0.08) + 's' }} />
+                ))}
+              </span>
+              <span className="radio-unit__play-label">
+                <Icon.Radio style={{fontSize: 16}} />
+                <span>{lang === 'ua' ? 'Слухати радіо 24/7' : 'Listen 24/7'}</span>
+              </span>
+            </button>
+            <div className="radio-unit__now">
+              {p.playing && p.track
+                ? (lang === 'ua' ? 'Зараз грає: ' : 'Now playing: ') + p.track.title
+                : (lang === 'ua' ? 'Натисни, щоб увімкнути ефір' : 'Tap to go live')}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
