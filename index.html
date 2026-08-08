@@ -6,7 +6,7 @@
 <title>Hard Fact Music — Українська музика</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Ruslan+Display&display=swap" rel="stylesheet">
 <style>
 /* ============================================
    Hard Fact Music — Design tokens & base
@@ -209,15 +209,29 @@ img { display: block; max-width: 100%; }
 .hero h1 {
   font-size: clamp(38px, 6vw, 84px);
   line-height: 0.95;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-family: 'Ruslan Display', 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0;
   margin: 0 0 14px;
   text-wrap: balance;
+  color: #9d0712;
+  background: linear-gradient(180deg, #ff8b82 0%, #d71925 28%, #8b0611 60%, #4a0209 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 1px 0 #ffb0a8, 0 3px 0 #70030c, 0 6px 0 #430008, 0 10px 14px rgba(0,0,0,0.7), 0 0 18px rgba(186,0,18,0.35);
 }
-.hero h1 .accent { color: var(--accent); }
+.hero h1 .accent {
+  color: inherit;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .hero h1 .stroke {
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--text);
+  color: inherit;
+  -webkit-text-stroke: 1px #ffb0a8;
+}
 }
 .hero-en {
   font-family: var(--mono);
