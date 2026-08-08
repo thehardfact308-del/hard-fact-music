@@ -232,6 +232,32 @@ img { display: block; max-width: 100%; }
   color: inherit;
   -webkit-text-stroke: 1px #ffb0a8;
 }
+.radio-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 18px;
+  padding: 15px 22px;
+  border: 1px solid #ff625f;
+  background: #8b0611;
+  color: #fff5f3;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  box-shadow: 0 5px 0 #480007, 0 10px 20px rgba(0,0,0,0.28);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.radio-launch:hover { background: #b90c19; transform: translateY(-1px); }
+.radio-launch:active { transform: translateY(3px); box-shadow: 0 2px 0 #480007; }
+.radio-launch .radio-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff817b;
+  box-shadow: 0 0 0 4px rgba(255,129,123,0.18), 0 0 12px #ff4d47;
+}
 }
 .hero-en {
   font-family: var(--mono);
@@ -1806,6 +1832,39 @@ const TRACKS = [
   { id: 2, title: 'Ангели',                titleEn: 'Angels',                artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:37', price: 89, cat: 'HFM-002', audioUrl: 'audio/angeli.mp3' },
   { id: 3, title: 'Я повернусь додому',    titleEn: 'I Will Return Home',    artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:54', price: 89, cat: 'HFM-003', audioUrl: 'audio/ya-povernus-dodomu.mp3' },
   { id: 4, title: 'Ми там де треба',       titleEn: 'We Are Where We\u2019re Needed', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:56', price: 89, cat: 'HFM-004', audioUrl: 'audio/mi-tam-de-treba.mp3' },
+  { id: 5, title: 'Crane Heartbreak', titleEn: 'Crane Heartbreak', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:35', price: 89, cat: 'HFM-005', audioUrl: 'audio/radio-01.mp3' },
+  { id: 6, title: 'І буде ранок — ремікс', titleEn: 'And There Will Be Morning — Remix', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:28', price: 89, cat: 'HFM-006', audioUrl: 'audio/radio-02.mp3' },
+  { id: 7, title: 'І буде ранок', titleEn: 'And There Will Be Morning', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:54', price: 89, cat: 'HFM-007', audioUrl: 'audio/radio-03.mp3' },
+  { id: 8, title: 'UA Bassline', titleEn: 'UA Bassline', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:55', price: 89, cat: 'HFM-008', audioUrl: 'audio/radio-04.mp3' },
+  { id: 9, title: 'Ангели — ремікс', titleEn: 'Angels — Remix', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:58', price: 89, cat: 'HFM-009', audioUrl: 'audio/radio-05.mp3' },
+  { id: 10, title: 'Ангели — дарк-ремікс', titleEn: 'Angels — Dark Remix', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:23', price: 89, cat: 'HFM-010', audioUrl: 'audio/radio-06.mp3' },
+  { id: 11, title: 'Бо я ТЦ', titleEn: 'Bo Ya TC', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:27', price: 89, cat: 'HFM-011', audioUrl: 'audio/radio-07.mp3' },
+  { id: 12, title: 'Весна — кавер', titleEn: 'Spring — Cover', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:27', price: 89, cat: 'HFM-012', audioUrl: 'audio/radio-08.mp3' },
+  { id: 13, title: 'Весна — акустика', titleEn: 'Spring — Acoustic', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:37', price: 89, cat: 'HFM-013', audioUrl: 'audio/radio-09.mp3' },
+  { id: 14, title: 'Весна', titleEn: 'Spring', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:42', price: 89, cat: 'HFM-014', audioUrl: 'audio/radio-10.mp3' },
+  { id: 15, title: 'Вітри часів', titleEn: 'Winds of Time', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:05', price: 89, cat: 'HFM-015', audioUrl: 'audio/radio-11.mp3' },
+  { id: 16, title: 'Дорога одна', titleEn: 'One Road', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:30', price: 89, cat: 'HFM-016', audioUrl: 'audio/radio-12.mp3' },
+  { id: 17, title: 'Згасає день', titleEn: 'Day Is Fading', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:32', price: 89, cat: 'HFM-017', audioUrl: 'audio/radio-13.mp3' },
+  { id: 18, title: 'Козацький вайб — інструментал', titleEn: 'Cossack Vibe — Instrumental', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:11', price: 89, cat: 'HFM-018', audioUrl: 'audio/radio-14.mp3' },
+  { id: 19, title: 'Крила — кавер-версія', titleEn: 'Wings — Cover Version', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:24', price: 89, cat: 'HFM-019', audioUrl: 'audio/radio-15.mp3' },
+  { id: 20, title: 'Крила', titleEn: 'Wings', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:36', price: 89, cat: 'HFM-020', audioUrl: 'audio/radio-16.mp3' },
+  { id: 21, title: 'Ми повернемось — кавер', titleEn: 'We Will Return — Cover', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:51', price: 89, cat: 'HFM-021', audioUrl: 'audio/radio-17.mp3' },
+  { id: 22, title: 'Ми повернемось', titleEn: 'We Will Return', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:15', price: 89, cat: 'HFM-022', audioUrl: 'audio/radio-18.mp3' },
+  { id: 23, title: 'Ми стали братами — кавер-версія', titleEn: 'We Became Brothers — Cover Version', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:44', price: 89, cat: 'HFM-023', audioUrl: 'audio/radio-19.mp3' },
+  { id: 24, title: 'Ми стали братами', titleEn: 'We Became Brothers', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:13', price: 89, cat: 'HFM-024', audioUrl: 'audio/radio-20.mp3' },
+  { id: 25, title: 'Микола в Голлівуд', titleEn: 'Mykola in Hollywood', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:57', price: 89, cat: 'HFM-025', audioUrl: 'audio/radio-21.mp3' },
+  { id: 26, title: 'Микола Самурай', titleEn: 'Mykola Samurai', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:06', price: 89, cat: 'HFM-026', audioUrl: 'audio/radio-22.mp3' },
+  { id: 27, title: 'Микола та дрифт', titleEn: 'Mykola and Drift', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:06', price: 89, cat: 'HFM-027', audioUrl: 'audio/radio-23.mp3' },
+  { id: 28, title: 'Наші міста', titleEn: 'Our Cities', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '4:44', price: 89, cat: 'HFM-028', audioUrl: 'audio/radio-24.mp3' },
+  { id: 29, title: 'Не пробочимо — Live', titleEn: 'Ne Probochymo — Live', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:58', price: 89, cat: 'HFM-029', audioUrl: 'audio/radio-25.mp3' },
+  { id: 30, title: 'Орк ти помер', titleEn: 'Orc, You Died', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:46', price: 89, cat: 'HFM-030', audioUrl: 'audio/radio-26.mp3' },
+  { id: 31, title: 'Перша дівка на селі', titleEn: 'First Girl in the Village', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:07', price: 89, cat: 'HFM-031', audioUrl: 'audio/radio-27.mp3' },
+  { id: 32, title: 'Сила моя 2 — кавер', titleEn: 'My Strength 2 — Cover', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:08', price: 89, cat: 'HFM-032', audioUrl: 'audio/radio-28.mp3' },
+  { id: 33, title: 'Сила моя — кавер', titleEn: 'My Strength — Cover', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:23', price: 89, cat: 'HFM-033', audioUrl: 'audio/radio-29.mp3' },
+  { id: 34, title: 'Сталеві серця — блюз-кавер', titleEn: 'Steel Hearts — Blues Cover', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:41', price: 89, cat: 'HFM-034', audioUrl: 'audio/radio-30.mp3' },
+  { id: 35, title: 'Сталеві серця', titleEn: 'Steel Hearts', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:40', price: 89, cat: 'HFM-035', audioUrl: 'audio/radio-31.mp3' },
+  { id: 36, title: 'Чекаю — кліп 100%', titleEn: 'Waiting — Clip 100%', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '3:40', price: 89, cat: 'HFM-036', audioUrl: 'audio/radio-32.mp3' },
+  { id: 37, title: 'Щоб нас почули', titleEn: 'So They Hear Us', artist: 'Hard Fact Music', artistEn: 'Hard Fact Music', duration: '2:42', price: 89, cat: 'HFM-037', audioUrl: 'audio/radio-33.mp3' },
 ];
 
 // attach waveform data
@@ -1889,6 +1948,7 @@ const Icon = {
   Download: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>,
   Heart: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/></svg>,
   ArrowRight: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
+  Radio: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="1em" height="1em" {...p}><path d="M4.9 19.1A10 10 0 0119.1 4.9M8.4 15.6a5 5 0 017.2-7.2M12 12h.01"/><path d="M5 20h14"/></svg>,
 };
 
 /* ============================================
@@ -1906,6 +1966,7 @@ function useAudioPlayer() {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.6);
+  const [ended, setEnded] = useState(0);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -1913,7 +1974,7 @@ function useAudioPlayer() {
     audio.volume = volume;
     const onTime = () => setCurrent(audio.currentTime);
     const onMeta = () => setDuration(audio.duration || 0);
-    const onEnd = () => { setPlaying(false); setCurrent(0); };
+    const onEnd = () => { setPlaying(false); setCurrent(0); setEnded(n => n + 1); };
     audio.addEventListener('timeupdate', onTime);
     audio.addEventListener('loadedmetadata', onMeta);
     audio.addEventListener('ended', onEnd);
@@ -1965,7 +2026,7 @@ function useAudioPlayer() {
 
   const setVolume = useCallback((v) => setVolumeState(v), []);
 
-  return { play, pause, stop, seek, setVolume, playing, current, duration, volume };
+  return { play, pause, stop, seek, setVolume, playing, current, duration, volume, ended };
 }
 
 /* ============================================
@@ -2009,6 +2070,18 @@ function PlayerProvider({ children }) {
     playTrack(queue[prevIdx]);
   }, [track, queue, playTrack]);
 
+  const playRadio = useCallback(() => {
+    if (TRACKS.length === 0) return;
+    const shuffled = [...TRACKS].sort(() => Math.random() - 0.5);
+    setQueue(shuffled);
+    setTrack(shuffled[0]);
+    player.play(shuffled[0].audioUrl, parseDuration(shuffled[0].duration));
+  }, [player]);
+
+  useEffect(() => {
+    if (player.ended > 0) next();
+  }, [player.ended, next]);
+
   const value = {
     track,
     playing: player.playing,
@@ -2017,6 +2090,7 @@ function PlayerProvider({ children }) {
     volume: player.volume,
     setVolume: player.setVolume,
     playTrack,
+    playRadio,
     toggle,
     next,
     prev,
@@ -2186,6 +2260,7 @@ function TopBar({ lang, setLang, cartCount, onCartClick, auth, onAuthClick, onLo
    Hero — three variants
    ============================================ */
 function Hero({ lang, variant }) {
+  const p = usePlayer();
   const stats = [
     { n: '2000+', unit: '', lbl: lang === 'ua' ? 'віршів написано' : 'poems written' },
     { n: String(TRACKS.length), unit: '', lbl: lang === 'ua' ? 'релізів у каталозі' : 'releases in catalog' },
@@ -2212,6 +2287,12 @@ function Hero({ lang, variant }) {
             <>Music<br/><span className="stroke">that</span> <span className="accent">won't stay silent.</span></>
           )}
         </h1>
+
+        <button className="radio-launch" onClick={p.playRadio}>
+          <span className="radio-mark" aria-hidden="true" />
+          <Icon.Radio style={{fontSize: 17}} />
+          <span>{lang === 'ua' ? 'Слухати радіо 24/7' : 'Listen to radio 24/7'}</span>
+        </button>
 
         <div className="hero-en">
           {lang === 'ua'
