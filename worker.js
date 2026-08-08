@@ -31,7 +31,22 @@ export default {
     }
 
     // Anything else — serve the static site as before.
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+
+    // Never let the HTML page itself get stuck in a stale cache (browser or edge) —
+    // this is what caused the phone to keep showing an old, already-fixed build.
+    // Heavier files (audio/video/images) keep their normal caching untouched.
+    if (url.pathname === '/' || url.pathname.endsWith('.html')) {
+      const headers = new Headers(assetResponse.headers);
+      headers.set('Cache-Control', 'no-cache, must-revalidate');
+      return new Response(assetResponse.body, {
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
+        headers,
+      });
+    }
+
+    return assetResponse;
   },
 };
 
