@@ -1,7 +1,15 @@
 {
   "name": "hard-fact-music",
   "compatibility_date": "2026-08-06",
+  "main": "worker.js",
   "assets": {
-    "directory": "."
-  }
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "USERS",
+      "id": "e0d180ec688d4fbc8cb266d2b34e4696"
+    }
+  ]
 }

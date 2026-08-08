@@ -2127,7 +2127,7 @@ const { TRACKS, FEATURED, BUNDLES, DONATE, NAV } = window.HFM_DATA;
 /* ============================================
    Top bar
    ============================================ */
-function TopBar({ lang, setLang, cartCount, onCartClick }) {
+function TopBar({ lang, setLang, cartCount, onCartClick, auth, onAuthClick, onLogout }) {
   return (
     <header className="topbar">
       <div className="container topbar-inner">
@@ -2148,6 +2148,15 @@ function TopBar({ lang, setLang, cartCount, onCartClick }) {
             <button className={lang === 'ua' ? 'on' : ''} onClick={() => setLang('ua')}>UA</button>
             <button className={lang === 'en' ? 'on' : ''} onClick={() => setLang('en')}>EN</button>
           </div>
+          {auth ? (
+            <button className="cart-btn" onClick={onLogout} title={lang === 'ua' ? 'Натисніть, щоб вийти' : 'Click to log out'}>
+              <span>{auth.name || auth.email.split('@')[0]}</span>
+            </button>
+          ) : (
+            <button className="cart-btn" onClick={onAuthClick}>
+              <span>{lang === 'ua' ? 'Зареєструватися' : 'Register'}</span>
+            </button>
+          )}
           <button className="cart-btn" onClick={onCartClick}>
             <Icon.Cart style={{fontSize: 13}} />
             <span>{lang === 'ua' ? 'Кошик' : 'Cart'}</span>
@@ -2594,6 +2603,21 @@ function App() {
 
   const [cartOpen, setCartOpen] = useState(false);
 
+  const [auth, setAuth] = useState(null);
+  const [authOpen, setAuthOpen] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/me')
+      .then(r => r.json())
+      .then(data => { if (data.authenticated) setAuth({ email: data.email, name: data.name }); })
+      .catch(() => {});
+  }, []);
+
+  const onLogout = async () => {
+    try { await fetch('/api/logout', { method: 'POST' }); } catch {}
+    setAuth(null);
+  };
+
   return (
     <>
       <TopBar
@@ -2601,7 +2625,14 @@ function App() {
         setLang={setLang}
         cartCount={cart.length}
         onCartClick={() => setCartOpen(v => !v)}
+        auth={auth}
+        onAuthClick={() => setAuthOpen(true)}
+        onLogout={onLogout}
       />
+
+      {authOpen && (
+        <AuthModal lang={lang} onClose={() => setAuthOpen(false)} onAuthed={setAuth} />
+      )}
 
       {cartOpen && (
         <CartDrawer
@@ -2796,6 +2827,157 @@ function CartDrawer({ cart, total, lang, onRemove, onClose, onClear }) {
             </button>
           )}
         </div>
+      </div>
+    </>
+  );
+}
+
+/* ============================================
+   Auth modal — register / log in
+   ============================================ */
+const labelStyle = {
+  display: 'block', fontFamily: 'var(--mono)', fontSize: 10,
+  color: 'var(--text-muted)', textTransform: 'uppercase',
+  letterSpacing: '0.1em', marginBottom: 6,
+};
+const inputStyle = {
+  width: '100%', padding: '10px 12px',
+  background: 'var(--bg-2)', border: '1px solid var(--hairline-strong)',
+  color: 'var(--text)', fontSize: 14, borderRadius: 2,
+  fontFamily: 'inherit', boxSizing: 'border-box',
+};
+
+function AuthModal({ lang, onClose, onAuthed }) {
+  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const t = {
+    login: lang === 'ua' ? 'Вхід' : 'Log in',
+    register: lang === 'ua' ? 'Реєстрація' : 'Register',
+    email: 'Email',
+    password: lang === 'ua' ? 'Пароль' : 'Password',
+    name: lang === 'ua' ? "Ім'я (необов'язково)" : 'Name (optional)',
+    submitLogin: lang === 'ua' ? 'Увійти' : 'Log in',
+    submitRegister: lang === 'ua' ? 'Зареєструватися' : 'Register',
+    switchToRegister: lang === 'ua' ? 'Немає акаунту? Зареєструватися' : "Don't have an account? Register",
+    switchToLogin: lang === 'ua' ? 'Вже є акаунт? Увійти' : 'Already have an account? Log in',
+    close: lang === 'ua' ? 'ЗАКРИТИ' : 'CLOSE',
+    passwordHint: lang === 'ua' ? 'Мінімум 6 символів' : 'At least 6 characters',
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!email || !password) {
+      setError(lang === 'ua' ? 'Заповніть email і пароль' : 'Fill in email and password');
+      return;
+    }
+    if (password.length < 6) {
+      setError(lang === 'ua' ? 'Пароль мінімум 6 символів' : 'Password must be at least 6 characters');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/${mode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mode === 'register' ? { email, password, name } : { email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || (lang === 'ua' ? 'Помилка' : 'Error'));
+        setLoading(false);
+        return;
+      }
+      onAuthed({ email: data.email, name: data.name });
+      onClose();
+    } catch (err) {
+      setError(lang === 'ua' ? "Немає з'єднання з сервером" : 'No connection to server');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 70,
+          backdropFilter: 'blur(4px)',
+        }}
+      />
+      <div style={{
+        position: 'fixed',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(400px, 92vw)',
+        background: 'var(--bg-1)',
+        border: '1px solid var(--hairline-strong)',
+        zIndex: 71,
+        padding: 28,
+      }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: 20,
+        }}>
+          <div style={{fontSize: 20, fontWeight: 700}}>
+            {mode === 'login' ? t.login : t.register}
+          </div>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: '1px solid var(--hairline-strong)',
+            color: 'var(--text)', padding: '6px 12px',
+            fontFamily: 'var(--mono)', fontSize: 10, textTransform: 'uppercase',
+            letterSpacing: '0.12em', borderRadius: 2, cursor: 'pointer',
+          }}>{t.close}</button>
+        </div>
+
+        <form onSubmit={submit}>
+          {mode === 'register' && (
+            <div style={{marginBottom: 14}}>
+              <label style={labelStyle}>{t.name}</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
+                style={inputStyle} />
+            </div>
+          )}
+          <div style={{marginBottom: 14}}>
+            <label style={labelStyle}>{t.email}</label>
+            <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+              style={inputStyle} />
+          </div>
+          <div style={{marginBottom: 8}}>
+            <label style={labelStyle}>{t.password}</label>
+            <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
+              style={inputStyle} />
+          </div>
+          {mode === 'register' && (
+            <div style={{fontSize: 11, color: 'var(--text-muted)', marginBottom: 18}}>{t.passwordHint}</div>
+          )}
+          {mode === 'login' && <div style={{marginBottom: 18}} />}
+
+          {error && (
+            <div style={{ color: '#ff6b6b', fontSize: 13, marginBottom: 14 }}>{error}</div>
+          )}
+
+          <button type="submit" disabled={loading} className="btn btn-primary btn-lg"
+            style={{width: '100%', justifyContent: 'center', marginBottom: 14}}>
+            {loading ? '···' : (mode === 'login' ? t.submitLogin : t.submitRegister)}
+          </button>
+        </form>
+
+        <button onClick={() => { setMode(m => m === 'login' ? 'register' : 'login'); setError(''); }}
+          style={{
+            display: 'block', width: '100%', textAlign: 'center',
+            background: 'transparent', border: 0, color: 'var(--text-dim)',
+            fontSize: 13, cursor: 'pointer', textDecoration: 'underline',
+          }}>
+          {mode === 'login' ? t.switchToRegister : t.switchToLogin}
+        </button>
       </div>
     </>
   );
