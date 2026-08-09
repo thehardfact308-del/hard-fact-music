@@ -2230,7 +2230,9 @@ function useAudioPlayer() {
     const onPlaying = () => setError(null);
     const onError = () => {
       setPlaying(false);
-      setError('Не вдалося завантажити аудіо. Перевірте з’єднання і спробуйте ще раз.');
+      setError('Файл недоступний, вмикаю наступний трек…');
+      setCurrent(0);
+      setEnded(n => n + 1); // treat a failed file like a finished one — auto-advance instead of freezing
     };
     audio.addEventListener('timeupdate', onTime);
     audio.addEventListener('loadedmetadata', onMeta);
