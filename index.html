@@ -726,7 +726,8 @@ img { display: block; max-width: 100%; }
    ============================================ */
 .bundles {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  justify-content: center;
   gap: 20px;
 }
 .bundle {
@@ -828,6 +829,12 @@ img { display: block; max-width: 100%; }
   gap: 56px;
   align-items: center;
 }
+.donate-grid--single {
+  grid-template-columns: 1fr;
+  max-width: 440px;
+  margin: 0 auto;
+  text-align: center;
+}
 .donate-tag {
   font-family: var(--mono);
   font-size: 11px;
@@ -898,6 +905,47 @@ img { display: block; max-width: 100%; }
   gap: 8px;
   margin-bottom: 20px;
 }
+.donate-support-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent-yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.donate-amount-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--bg-2);
+  padding: 4px 18px;
+  margin-bottom: 16px;
+}
+.donate-amount-input .curr {
+  font-family: var(--mono);
+  font-size: 20px;
+  color: var(--text-muted);
+}
+.donate-amount-input input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 14px 0;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.donate-amount-input input::-webkit-outer-spin-button,
+.donate-amount-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.donate-amount-input input::placeholder { color: var(--text-muted); }
 .amount-btn {
   padding: 16px 8px;
   background: transparent;
@@ -2023,29 +2071,9 @@ const BUNDLES = [
       'Ліцензія на приватне прослуховування',
     ],
   },
-  {
-    name: 'Каталог / Catalog',
-    title: 'Весь каталог',
-    en: 'All current releases, one price',
-    price: 249,
-    note: 'вигідніше, ніж по одному треку',
-    highlight: true,
-    features: [
-      'Усі релізи у WAV + MP3',
-      'Оновлюється новими треками безкоштовно',
-      'Ліцензія на приватне прослуховування',
-    ],
-  },
 ];
 
-const DONATE = {
-  goal: 0,
-  raised: 0,
-  fund: '\u2014 вкажіть фонд \u2014',
-  iban: '\u2014 додайте реквізити \u2014',
-  edrpou: '\u2014',
-  amounts: [100, 300, 500],
-};
+
 
 const NAV = [
   { key: 'releases', ua: 'Релізи',   en: 'Releases' },
@@ -2238,8 +2266,12 @@ function PlayerProvider({ children }) {
     player.play(shuffled[0].audioUrl, parseDuration(shuffled[0].duration));
   }, [player]);
 
+  const lastEndedRef = useRef(0);
   useEffect(() => {
-    if (player.ended > 0) next();
+    if (player.ended > lastEndedRef.current) {
+      lastEndedRef.current = player.ended;
+      next();
+    }
   }, [player.ended, next]);
 
   const value = {
@@ -2729,70 +2761,44 @@ function Shop({ lang, onBuy, isInCart }) {
    Donate
    ============================================ */
 function Donate({ lang }) {
-  const [selected, setSelected] = useState(300);
-  const fmt = (n) => n.toLocaleString('uk-UA');
+  const [amount, setAmount] = useState('');
+
+  const handleSupport = () => {
+    // Placeholder destination until a specific fund/payment link is provided —
+    // United24 is Ukraine's official state fundraising platform, defense category.
+    window.open('https://u24.gov.ua/', '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section className="section" id="donate">
       <div className="container">
         <div className="donate">
-          <div className="donate-grid">
+          <div className="donate-grid donate-grid--single">
             <div>
-              <div className="donate-tag">
-                <span className="dot" />
-                {lang === 'ua' ? 'ЧОРНОВИК · ФОНД НЕ ВКАЗАНО' : 'DRAFT · FUND NOT SET'}
-              </div>
               <h2>
-                {lang === 'ua' ? 'Купуй музику. Тримай країну.' : 'Buy the music. Hold the country.'}
-                <span className="en">{lang === 'ua' ? 'BUY THE MUSIC. HOLD THE COUNTRY.' : 'КУПУЙ МУЗИКУ. ТРИМАЙ КРАЇНУ.'}</span>
+                {lang === 'ua' ? 'Купуй музику.' : 'Buy the music.'}
               </h2>
-              <p>
-                {lang === 'ua'
-                  ? 'Місце під реальний благодійний фонд і відсоток відрахувань — заповнити перед запуском сайту. Зараз тут демо-заглушка, щоб показати, як це виглядатиме.'
-                  : 'Placeholder for a real charity fund and the donation percentage — fill this in before launch. This is a demo stand-in for now.'
-                }
-              </p>
 
-              <div className="donate-amounts">
-                {DONATE.amounts.map(a => (
-                  <button
-                    key={a}
-                    className={`amount-btn ${selected === a ? 'on' : ''}`}
-                    onClick={() => setSelected(a)}
-                  >
-                    {a}₴
-                  </button>
-                ))}
+              <div className="donate-support-label">
+                {lang === 'ua' ? 'Підтримати ЗСУ' : 'Support the Armed Forces of Ukraine'}
               </div>
 
-              <button className="btn btn-primary btn-lg" style={{width: '100%', justifyContent: 'center'}}>
-                {lang === 'ua' ? `ПІДТРИМАТИ · ${selected}₴` : `SUPPORT · ${selected}₴`}
+              <div className="donate-amount-input">
+                <span className="curr">₴</span>
+                <input
+                  type="number"
+                  min="1"
+                  inputMode="numeric"
+                  placeholder={lang === 'ua' ? 'Сума' : 'Amount'}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              </div>
+
+              <button className="btn btn-primary btn-lg" style={{width: '100%', justifyContent: 'center'}} onClick={handleSupport}>
+                {lang === 'ua' ? 'ПІДТРИМАТИ ЗСУ' : 'SUPPORT'}
                 <Icon.ArrowRight style={{fontSize: 14}} />
               </button>
-            </div>
-
-            <div className="donate-detail">
-              <h4>{lang === 'ua' ? 'Реквізити фонду' : 'Fund details'}</h4>
-              <div className="donate-detail-row">
-                <span className="k">{lang === 'ua' ? 'Отримувач' : 'Recipient'}</span>
-                <span className="v">{DONATE.fund}</span>
-              </div>
-              <div className="donate-detail-row">
-                <span className="k">IBAN</span>
-                <span className="v">{DONATE.iban}</span>
-              </div>
-              <div className="donate-detail-row">
-                <span className="k">ЄДРПОУ</span>
-                <span className="v">{DONATE.edrpou}</span>
-              </div>
-              <div className="donate-detail-row">
-                <span className="k">{lang === 'ua' ? 'Призначення' : 'Purpose'}</span>
-                <span className="v">Charitable aid</span>
-              </div>
-              <div className="donate-detail-row">
-                <span className="k">{lang === 'ua' ? 'Оновлено' : 'Updated'}</span>
-                <span className="v">{new Date().toISOString().slice(0,10)}</span>
-              </div>
             </div>
           </div>
         </div>
