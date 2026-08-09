@@ -350,7 +350,6 @@ img { display: block; max-width: 100%; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-}
 .hero-en {
   font-family: var(--mono);
   font-size: clamp(10px, 1.1vw, 12px);
@@ -946,6 +945,13 @@ img { display: block; max-width: 100%; }
   -webkit-appearance: none; margin: 0;
 }
 .donate-amount-input input::placeholder { color: var(--text-muted); }
+.donate-paused-note {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 .amount-btn {
   padding: 16px 8px;
   background: transparent;
@@ -987,6 +993,85 @@ img { display: block; max-width: 100%; }
 /* ============================================
    Footer
    ============================================ */
+.reviews-empty {
+  border: 1px dashed var(--hairline-strong);
+  padding: clamp(40px, 6vw, 72px) 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.reviews-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-strong);
+  color: var(--text-dim);
+  margin-bottom: 18px;
+}
+.reviews-empty p {
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.faq-list {
+  max-width: 760px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--hairline);
+}
+.faq-item:first-child { border-top: 1px solid var(--hairline); }
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 4px;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.faq-item.is-open .faq-question { color: var(--accent); }
+.faq-toggle {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--text-muted);
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+}
+.faq-answer {
+  padding: 0 28px 24px 4px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+.btn.is-disabled,
+.btn.is-disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-2) !important;
+  border-color: var(--hairline) !important;
+  color: var(--text-muted) !important;
+  transform: none !important;
+}
+.radio-unit__play.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+.radio-unit__play.is-disabled:hover,
+.radio-unit__play.is-disabled:active {
+  transform: none;
+  box-shadow: 0 6px 0 #3f0007, 0 14px 26px rgba(0,0,0,0.4);
+}
 .footer {
   border-top: 1px solid var(--hairline);
   padding: 64px 0 40px;
@@ -2383,12 +2468,10 @@ function StickyPlayer({ onBuy, lang, inCart }) {
             onChange={e => p.setVolume(parseFloat(e.target.value))}
           />
         </div>
-        <button className="player-buy" onClick={() => onBuy(p.track)}>
+        <button className="player-buy is-disabled" disabled title={lang === 'ua' ? 'Незабаром' : 'Coming soon'}>
           <Icon.Cart style={{fontSize: 13}} />
           <span className="buy-label">
-            {isInCart
-              ? (lang === 'ua' ? 'У кошику' : 'In cart')
-              : `${p.track.price}₴ ${lang === 'ua' ? 'купити' : 'buy'}`}
+            {lang === 'ua' ? 'Незабаром' : 'Coming soon'}
           </span>
         </button>
       </div>
@@ -2604,12 +2687,9 @@ function Featured({ lang, onPlay, onBuy, isInCart }) {
                 <Icon.Play style={{fontSize: 16}} />
                 {lang === 'ua' ? 'Слухати' : 'Play'}
               </button>
-              <button className="btn btn-outline btn-lg" onClick={() => onBuy(TRACKS[0])}>
+              <button className="btn btn-outline btn-lg is-disabled" disabled>
                 <Icon.Cart style={{fontSize: 14}} />
-                {isInCart(TRACKS[0].id)
-                  ? (lang === 'ua' ? 'У кошику' : 'In cart')
-                  : (lang === 'ua' ? `Купити · ${TRACKS[0].price}₴` : `Buy · ${TRACKS[0].price}₴`)
-                }
+                {lang === 'ua' ? 'Незабаром' : 'Coming soon'}
               </button>
             </div>
           </div>
@@ -2683,14 +2763,8 @@ function Tracklist({ lang, onPlay, onBuy, isInCart }) {
                 </div>
                 <div className="t-price">{t.price}₴</div>
                 <div>
-                  <button
-                    className={`t-buy ${inCart ? 'in-cart' : ''}`}
-                    onClick={() => onBuy(t)}
-                  >
-                    {inCart
-                      ? (lang === 'ua' ? '✓ Додано' : '✓ Added')
-                      : (lang === 'ua' ? 'Купити' : 'Buy')
-                    }
+                  <button className="t-buy is-disabled" disabled title={lang === 'ua' ? 'Незабаром' : 'Coming soon'}>
+                    {lang === 'ua' ? 'Незабаром' : 'Soon'}
                   </button>
                 </div>
               </div>
@@ -2738,15 +2812,8 @@ function Shop({ lang, onBuy, isInCart }) {
                 <ul>
                   {b.features.map((f, j) => <li key={j}>{f}</li>)}
                 </ul>
-                <button
-                  className={`btn ${b.highlight ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => onBuy({ id: bid, title: b.title, price: b.price })}
-                >
-                  {inCart
-                    ? (lang === 'ua' ? '✓ У КОШИКУ' : '✓ IN CART')
-                    : (lang === 'ua' ? 'ДОДАТИ ДО КОШИКА' : 'ADD TO CART')
-                  }
-                  <Icon.ArrowRight style={{fontSize: 12}} />
+                <button className={`btn ${b.highlight ? 'btn-primary' : 'btn-outline'} is-disabled`} disabled>
+                  {lang === 'ua' ? 'Незабаром' : 'Coming soon'}
                 </button>
               </div>
             );
@@ -2762,12 +2829,6 @@ function Shop({ lang, onBuy, isInCart }) {
    ============================================ */
 function Donate({ lang }) {
   const [amount, setAmount] = useState('');
-
-  const handleSupport = () => {
-    // Placeholder destination until a specific fund/payment link is provided —
-    // United24 is Ukraine's official state fundraising platform, defense category.
-    window.open('https://u24.gov.ua/', '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <section className="section" id="donate">
@@ -2792,15 +2853,135 @@ function Donate({ lang }) {
                   placeholder={lang === 'ua' ? 'Сума' : 'Amount'}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  disabled
                 />
               </div>
 
-              <button className="btn btn-primary btn-lg" style={{width: '100%', justifyContent: 'center'}} onClick={handleSupport}>
-                {lang === 'ua' ? 'ПІДТРИМАТИ ЗСУ' : 'SUPPORT'}
-                <Icon.ArrowRight style={{fontSize: 14}} />
+              <button className="btn btn-primary btn-lg is-disabled" style={{width: '100%', justifyContent: 'center'}} disabled>
+                {lang === 'ua' ? 'Незабаром' : 'Coming soon'}
               </button>
+              <div className="donate-paused-note">
+                {lang === 'ua'
+                  ? 'Донати тимчасово призупинені — обираємо перевірений фонд.'
+                  : 'Donations are temporarily paused while we choose a verified fund.'
+                }
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================
+   Reviews — empty state until real listener reviews exist
+   ============================================ */
+function Reviews({ lang }) {
+  return (
+    <section className="section" id="reviews">
+      <div className="container">
+        <div className="section-head">
+          <div>
+            <div className="section-num">04 / {lang === 'ua' ? 'ВІДГУКИ' : 'REVIEWS'}</div>
+            <h2>{lang === 'ua' ? 'Відгуки' : 'Reviews'}</h2>
+          </div>
+        </div>
+
+        <div className="reviews-empty">
+          <div className="reviews-empty-icon" aria-hidden="true">
+            <Icon.Radio style={{fontSize: 28}} />
+          </div>
+          <p>
+            {lang === 'ua'
+              ? 'Тут з\u2019являться відгуки слухачів, коли вони будуть.'
+              : 'Listener reviews will show up here once there are some.'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================
+   FAQ
+   ============================================ */
+function FAQ({ lang }) {
+  const [open, setOpen] = useState(0);
+
+  const items = lang === 'ua' ? [
+    {
+      q: 'Хто створює музику?',
+      a: 'Це авторський проєкт Володимира Гончаренка. Тексти пишу особисто я, до появи будь-якого запиту в нейромережу. Suno AI, Veo3 та FL Studio — інструменти для аранжування, відео та зведення, а не автори.',
+    },
+    {
+      q: 'У якому форматі я отримаю трек після покупки?',
+      a: 'WAV студійної якості + MP3 320 kbps, посилання на завантаження приходить одразу після оплати.',
+    },
+    {
+      q: 'Скільки коштує трек?',
+      a: 'Один трек — ₴89. Ціна єдина для всього каталогу.',
+    },
+    {
+      q: 'Чи можна прослухати трек безкоштовно?',
+      a: 'Так, короткий уривок кожного треку доступний безкоштовно у плеєрі на сайті та в радіоефірі 24/7. Повна версія для завантаження — платна.',
+    },
+    {
+      q: 'Куди йдуть кошти з розділу "Донат"?',
+      a: 'Наразі приймання донатів тимчасово призупинено — ми обираємо перевірений фонд для підтримки ЗСУ, перш ніж вмикати збір коштів.',
+    },
+    {
+      q: 'Якими мовами доступний сайт?',
+      a: 'Українська та англійська — перемикач мови є у верхньому меню.',
+    },
+  ] : [
+    {
+      q: 'Who makes the music?',
+      a: 'This is Volodymyr Honcharenko\u2019s author project. I write every lyric myself, before any prompt exists. Suno AI, Veo3 and FL Studio are tools for arrangement, video and mixing — not authors.',
+    },
+    {
+      q: 'What format do I get after buying a track?',
+      a: 'Studio-quality WAV + MP3 320 kbps. The download link arrives right after payment.',
+    },
+    {
+      q: 'How much does a track cost?',
+      a: 'One track is ₴89 — a single price across the whole catalog.',
+    },
+    {
+      q: 'Can I listen for free?',
+      a: 'Yes — a short preview of every track is free in the player and on the 24/7 radio. The full downloadable version is paid.',
+    },
+    {
+      q: 'Where does money from the "Donate" section go?',
+      a: 'Donations are temporarily paused while we choose a verified charity supporting Ukraine\u2019s Armed Forces before turning fundraising on.',
+    },
+    {
+      q: 'What languages does the site support?',
+      a: 'Ukrainian and English — switch with the toggle in the top menu.',
+    },
+  ];
+
+  return (
+    <section className="section" id="faq">
+      <div className="container">
+        <div className="section-head">
+          <div>
+            <div className="section-num">05 / FAQ</div>
+            <h2>{lang === 'ua' ? 'Часті питання' : 'FAQ'}</h2>
+          </div>
+        </div>
+
+        <div className="faq-list">
+          {items.map((item, i) => (
+            <div key={i} className={`faq-item ${open === i ? 'is-open' : ''}`}>
+              <button className="faq-question" onClick={() => setOpen(open === i ? -1 : i)}>
+                <span>{item.q}</span>
+                <span className="faq-toggle">{open === i ? '\u2212' : '+'}</span>
+              </button>
+              {open === i && <div className="faq-answer">{item.a}</div>}
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -2960,6 +3141,8 @@ function App() {
       <Tracklist lang={lang} onPlay={onPlay} onBuy={onBuy} isInCart={isInCart} />
       <Shop lang={lang} onBuy={onBuy} isInCart={isInCart} />
       <Donate lang={lang} />
+      <Reviews lang={lang} />
+      <FAQ lang={lang} />
       <Footer lang={lang} />
 
       <StickyPlayer onBuy={onBuy} lang={lang} inCart={isInCart} />
