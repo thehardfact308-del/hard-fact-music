@@ -9,10 +9,10 @@
  *
  * Passwords are never stored in plain text — only a PBKDF2 hash + random salt.
  */
- 
+
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 const encoder = new TextEncoder();
- 
+
 /**
  * Live listener counter for the HFM radio widget.
  *   key "listen:<clientId>" -> "<timestamp>"  (auto-expires — acts as a heartbeat)
@@ -21,11 +21,11 @@ const encoder = new TextEncoder();
  */
 const BASE_LISTENERS = 67;
 const LISTEN_TTL_SECONDS = 90; // must outlive the client's ping interval (25s)
- 
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
- 
+
     if (url.pathname === '/api/register' && request.method === 'POST') {
       return handleRegister(request, env);
     }
@@ -47,10 +47,10 @@ export default {
     if (url.pathname === '/api/listen/count' && request.method === 'GET') {
       return handleListenCount(request, env);
     }
- 
+
     // Anything else — serve the static site as before.
     const assetResponse = await env.ASSETS.fetch(request);
- 
+
     // Never let the HTML page itself get stuck in a stale cache (browser or edge) —
     // this is what caused the phone to keep showing an old, already-fixed build.
     // Heavier files (audio/video/images) keep their normal caching untouched.
@@ -63,49 +63,49 @@ export default {
         headers,
       });
     }
- 
+
     return assetResponse;
   },
 };
- 
+
 async function handleRegister(request, env) {
   try {
     const body = await request.json();
     const email = normalizeEmail(body.email);
     const password = body.password || '';
     const name = (body.name || '').trim().slice(0, 80);
- 
+
     if (!email || !isValidEmail(email)) {
       return json({ error: 'Некоректний email.' }, 400);
     }
     if (password.length < 6) {
       return json({ error: 'Пароль мінімум 6 символів.' }, 400);
     }
- 
+
     const key = 'user:' + email;
     const existing = await env.USERS.get(key);
     if (existing) {
       return json({ error: 'Цей email вже зареєстрований.' }, 409);
     }
- 
+
     const salt = randomToken(16);
     const passwordHash = await hashPassword(password, salt);
     const user = { email, name, passwordHash, salt, createdAt: Date.now() };
     await env.USERS.put(key, JSON.stringify(user));
- 
+
     const token = await createSession(env, email);
     return withSessionCookie(json({ ok: true, email, name }), token);
   } catch (e) {
     return json({ error: 'Помилка сервера. Спробуйте ще раз.' }, 500);
   }
 }
- 
+
 async function handleLogin(request, env) {
   try {
     const body = await request.json();
     const email = normalizeEmail(body.email);
     const password = body.password || '';
- 
+
     const raw = await env.USERS.get('user:' + email);
     if (!raw) {
       return json({ error: 'Невірний email або пароль.' }, 401);
@@ -115,28 +115,28 @@ async function handleLogin(request, env) {
     if (hash !== user.passwordHash) {
       return json({ error: 'Невірний email або пароль.' }, 401);
     }
- 
+
     const token = await createSession(env, user.email);
     return withSessionCookie(json({ ok: true, email: user.email, name: user.name }), token);
   } catch (e) {
     return json({ error: 'Помилка сервера. Спробуйте ще раз.' }, 500);
   }
 }
- 
+
 async function handleMe(request, env) {
   const token = getCookie(request, 'session');
   if (!token) return json({ authenticated: false });
- 
+
   const email = await env.USERS.get('session:' + token);
   if (!email) return json({ authenticated: false });
- 
+
   const raw = await env.USERS.get('user:' + email);
   if (!raw) return json({ authenticated: false });
- 
+
   const user = JSON.parse(raw);
   return json({ authenticated: true, email: user.email, name: user.name });
 }
- 
+
 async function handleLogout(request, env) {
   const token = getCookie(request, 'session');
   if (token) {
@@ -149,7 +149,7 @@ async function handleLogout(request, env) {
   );
   return res;
 }
- 
+
 async function handleListenPing(request, env) {
   try {
     const body = await request.json();
@@ -163,7 +163,7 @@ async function handleListenPing(request, env) {
     return json({ error: 'bad request' }, 400);
   }
 }
- 
+
 async function handleListenStop(request, env) {
   try {
     const body = await request.json();
@@ -174,7 +174,7 @@ async function handleListenStop(request, env) {
     return json({ ok: true }); // best-effort — never block the UI on this
   }
 }
- 
+
 async function handleListenCount(request, env) {
   let real = 0;
   let cursor;
@@ -183,24 +183,24 @@ async function handleListenCount(request, env) {
     real += page.keys.length;
     cursor = page.list_complete ? null : page.cursor;
   } while (cursor);
- 
+
   return json({ count: BASE_LISTENERS + real });
 }
- 
+
 function sanitizeListenerId(id) {
   if (typeof id !== 'string') return null;
   if (!/^[a-zA-Z0-9_-]{8,64}$/.test(id)) return null;
   return id;
 }
- 
+
 /* ---------- helpers ---------- */
- 
+
 async function createSession(env, email) {
   const token = randomToken(32);
   await env.USERS.put('session:' + token, email, { expirationTtl: SESSION_TTL_SECONDS });
   return token;
 }
- 
+
 function withSessionCookie(response, token) {
   response.headers.append(
     'Set-Cookie',
@@ -208,7 +208,7 @@ function withSessionCookie(response, token) {
   );
   return response;
 }
- 
+
 async function hashPassword(password, salt) {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
@@ -224,38 +224,37 @@ async function hashPassword(password, salt) {
   );
   return bufferToBase64(bits);
 }
- 
+
 function randomToken(byteLength) {
   const arr = new Uint8Array(byteLength);
   crypto.getRandomValues(arr);
   return bufferToBase64(arr.buffer).replace(/[+/=]/g, '');
 }
- 
+
 function bufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
- 
+
 function normalizeEmail(email) {
   return (email || '').toString().trim().toLowerCase();
 }
- 
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
- 
+
 function getCookie(request, name) {
   const cookieHeader = request.headers.get('Cookie') || '';
   const match = cookieHeader.match(new RegExp('(?:^|; )' + name + '=([^;]+)'));
   return match ? decodeURIComponent(match[1]) : null;
 }
- 
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
 }
- 
